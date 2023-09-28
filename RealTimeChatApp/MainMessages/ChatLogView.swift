@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
-import Firebase
 
 struct ChatLogView: View {
   @ObservedObject var chatLogViewModel: ChatLogViewModel
   let chatUser: ChatUser?
+  let emptyScrollToString = "Empty"
   
   init(chatUser: ChatUser?) {
     self.chatUser = chatUser
@@ -35,42 +35,24 @@ struct ChatLogView: View {
   
   private var messagesView: some View {
     ScrollView {
-      VStack {
-        ForEach(chatLogViewModel.chatMessages) { message in
+      ScrollViewReader { scrollViewProxy in
+        VStack {
           VStack {
-            if message.fromId == Auth.auth().currentUser?.uid {
-              HStack {
-                Spacer()
-                
-                HStack {
-                  Text(message.text)
-                    .foregroundColor(.white)
-                }
-                .padding()
-                .background(Color.blue)
-                .cornerRadius(9)
-              }
-            } else {
-              HStack {
-                HStack {
-                  Text(message.text)
-                    .foregroundColor(.black)
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(9)
-                
-                Spacer()
-              }
+            ForEach(chatLogViewModel.chatMessages) { message in
+              MessageView(message: message)
             }
           }
-          .padding(.horizontal)
-          .padding(.top, 8)
+          .padding(.bottom, 50)
+          
+          HStack { Spacer() }
+            .id(emptyScrollToString)
+        }
+        .onReceive(chatLogViewModel.$count) { _ in
+          withAnimation(.easeOut(duration: 0.5)) {
+            scrollViewProxy.scrollTo(emptyScrollToString, anchor: .bottom)
+          }
         }
       }
-      .padding(.bottom, 50)
-      
-      HStack { Spacer() }
     }
     .background(Color(.init(white: 0.95, alpha: 1)))
   }

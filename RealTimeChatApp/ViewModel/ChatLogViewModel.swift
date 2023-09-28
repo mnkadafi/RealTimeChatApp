@@ -13,6 +13,8 @@ class ChatLogViewModel: ObservableObject {
   @Published var chatText: String = ""
   @Published var errorMessage: String = ""
   @Published var chatMessages = [ChatMessages]()
+  @Published var count = 0
+  
   let chatUser: ChatUser?
   
   init(chatUser: ChatUser?) {
@@ -42,6 +44,10 @@ class ChatLogViewModel: ObservableObject {
             self.chatMessages.append(.init(documentId: docId, data: data))
           }
         })
+        
+        DispatchQueue.main.async {
+          self.count += 1
+        }
       }
   }
   
@@ -81,6 +87,7 @@ class ChatLogViewModel: ObservableObject {
       
       self.errorMessage = "Recipient saved message as well"
       self.chatText = ""
+      self.count += 1
       print("Recipient saved message as well")
     }
   }
