@@ -71,6 +71,7 @@ class ChatLogViewModel: ObservableObject {
       
       self.errorMessage = "Successfully saved current user sending message"
       print("Successfully saved current user sending message")
+      self.persistRecentMessage()
     }
     
     let recipientMessageDocument = Firestore.firestore().collection("messages")
@@ -86,9 +87,37 @@ class ChatLogViewModel: ObservableObject {
       }
       
       self.errorMessage = "Recipient saved message as well"
-      self.chatText = ""
       self.count += 1
+      self.chatText = ""
       print("Recipient saved message as well")
+    }
+  }
+  
+  private func persistRecentMessage() {
+    guard let chatUser = chatUser else { return }
+    guard let uid = Auth.auth().currentUser?.uid else { return }
+    
+    let document = Firestore.firestore()
+      .collection("recent_messages")
+      .document(uid)
+      .collection("messages")
+      .document(chatUser.uid)
+    
+    let data = [
+      FirebaseConstants.timestamp: Timestamp(),
+      FirebaseConstants.text: self.chatText,
+      FirebaseConstants.fromId: uid,
+      FirebaseConstants.toId: chatUser.uid,
+      FirebaseConstants.profileImageUrl: chatUser.profileImageUrl,
+      FirebaseConstants.email: chatUser.email,
+    ] as [String: Any]
+    
+    document.setData(data) { error in
+      if let error = error {
+        self.errorMessage = "Failed to save recent message into Firestore \(error)"
+        print("Failed to save recent message into Firestore", error)
+        return
+      }
     }
   }
 }
