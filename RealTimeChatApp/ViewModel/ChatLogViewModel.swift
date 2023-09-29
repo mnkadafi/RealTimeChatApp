@@ -57,44 +57,46 @@ class ChatLogViewModel: ObservableObject {
   }
   
   func handleSend() {
-    guard let fromId = Auth.auth().currentUser?.uid else { return }
-    guard let toId = chatUser?.uid else { return }
-    
-    let document = Firestore.firestore().collection("messages")
-      .document(fromId)
-      .collection(toId)
-      .document()
-    
-    let messageData = [FirebaseConstants.fromId: fromId, FirebaseConstants.toId: toId, FirebaseConstants.text: chatText, "timestamp": Timestamp()] as [String: Any]
-    
-    document.setData(messageData) { error in
-      if let error = error {
-        self.errorMessage = "Failed to save message into Firestore \(error)"
-        print("Failed to save message into Firestore", error)
-        return
+    if self.chatText != "" {
+      guard let fromId = Auth.auth().currentUser?.uid else { return }
+      guard let toId = chatUser?.uid else { return }
+      
+      let document = Firestore.firestore().collection("messages")
+        .document(fromId)
+        .collection(toId)
+        .document()
+      
+      let messageData = [FirebaseConstants.fromId: fromId, FirebaseConstants.toId: toId, FirebaseConstants.text: chatText, "timestamp": Timestamp()] as [String: Any]
+      
+      document.setData(messageData) { error in
+        if let error = error {
+          self.errorMessage = "Failed to save message into Firestore \(error)"
+          print("Failed to save message into Firestore", error)
+          return
+        }
+        
+        self.errorMessage = "Successfully saved current user sending message"
+        print("Successfully saved current user sending message")
+        self.persistRecentMessage()
       }
       
-      self.errorMessage = "Successfully saved current user sending message"
-      print("Successfully saved current user sending message")
-      self.persistRecentMessage()
-    }
-    
-    let recipientMessageDocument = Firestore.firestore().collection("messages")
-      .document(toId)
-      .collection(fromId)
-      .document()
-    
-    recipientMessageDocument.setData(messageData) { error in
-      if let error = error {
-        self.errorMessage = "Failed to save message into Firestore \(error)"
-        print("Failed to save message into Firestore", error)
-        return
-      }
+      let recipientMessageDocument = Firestore.firestore().collection("messages")
+        .document(toId)
+        .collection(fromId)
+        .document()
       
-      self.errorMessage = "Recipient saved message as well"
-      self.count += 1
-      self.chatText = ""
-      print("Recipient saved message as well")
+      recipientMessageDocument.setData(messageData) { error in
+        if let error = error {
+          self.errorMessage = "Failed to save message into Firestore \(error)"
+          print("Failed to save message into Firestore", error)
+          return
+        }
+        
+        self.errorMessage = "Recipient saved message as well"
+        self.count += 1
+        self.chatText = ""
+        print("Recipient saved message as well")
+      }
     }
   }
   

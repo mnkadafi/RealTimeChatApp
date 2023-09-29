@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B47895C52AC46A6D006CF1CD /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = B47895C42AC46A6D006CF1CD /* SDWebImageSwiftUI */; };
 		B47895C92AC49889006CF1CD /* ChatUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895C82AC49889006CF1CD /* ChatUser.swift */; };
 		B47895CC2AC5017C006CF1CD /* CreateNewMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895CB2AC5017C006CF1CD /* CreateNewMessageView.swift */; };
 		B47895CE2AC50B49006CF1CD /* CreateNewMessageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895CD2AC50B49006CF1CD /* CreateNewMessageViewModel.swift */; };
@@ -17,6 +16,7 @@
 		B47895D62AC57E2B006CF1CD /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895D52AC57E2B006CF1CD /* MessageView.swift */; };
 		B47895DB2AC5CDB3006CF1CD /* RecentMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895DA2AC5CDB3006CF1CD /* RecentMessages.swift */; };
 		B47895DE2AC5D46E006CF1CD /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = B47895DD2AC5D46E006CF1CD /* Date+Ext.swift */; };
+		B496526A2AC73E1B002D8579 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = B49652692AC73E1B002D8579 /* Kingfisher */; };
 		B4B124C42AC5EA6300473150 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B4B124C32AC5EA6300473150 /* FirebaseAuth */; };
 		B4B124C62AC5EA6300473150 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B4B124C52AC5EA6300473150 /* FirebaseFirestore */; };
 		B4B124C82AC5EA6300473150 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = B4B124C72AC5EA6300473150 /* FirebaseFirestoreSwift */; };
@@ -59,7 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B47895C52AC46A6D006CF1CD /* SDWebImageSwiftUI in Frameworks */,
+				B496526A2AC73E1B002D8579 /* Kingfisher in Frameworks */,
 				B4B124C42AC5EA6300473150 /* FirebaseAuth in Frameworks */,
 				B4B124C62AC5EA6300473150 /* FirebaseFirestore in Frameworks */,
 				B4B124CA2AC5EA6300473150 /* FirebaseStorage in Frameworks */,
@@ -192,11 +192,11 @@
 			);
 			name = RealTimeChatApp;
 			packageProductDependencies = (
-				B47895C42AC46A6D006CF1CD /* SDWebImageSwiftUI */,
 				B4B124C32AC5EA6300473150 /* FirebaseAuth */,
 				B4B124C52AC5EA6300473150 /* FirebaseFirestore */,
 				B4B124C72AC5EA6300473150 /* FirebaseFirestoreSwift */,
 				B4B124C92AC5EA6300473150 /* FirebaseStorage */,
+				B49652692AC73E1B002D8579 /* Kingfisher */,
 			);
 			productName = RealTimeChatApp;
 			productReference = B4B1DEB12AC17D6F002307B6 /* RealTimeChatApp.app */;
@@ -227,8 +227,8 @@
 			);
 			mainGroup = B4B1DEA82AC17D6F002307B6;
 			packageReferences = (
-				B47895C32AC46A6D006CF1CD /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				B4B124C22AC5EA6300473150 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				B49652682AC73E1B002D8579 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			productRefGroup = B4B1DEB22AC17D6F002307B6 /* Products */;
 			projectDirPath = "";
@@ -480,12 +480,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		B47895C32AC46A6D006CF1CD /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+		B49652682AC73E1B002D8579 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = exactVersion;
+				version = 6.3.1;
 			};
 		};
 		B4B124C22AC5EA6300473150 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -499,10 +499,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B47895C42AC46A6D006CF1CD /* SDWebImageSwiftUI */ = {
+		B49652692AC73E1B002D8579 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = B47895C32AC46A6D006CF1CD /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
-			productName = SDWebImageSwiftUI;
+			package = B49652682AC73E1B002D8579 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		B4B124C32AC5EA6300473150 /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;

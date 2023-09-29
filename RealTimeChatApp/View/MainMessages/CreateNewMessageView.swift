@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SDWebImageSwiftUI
+import Kingfisher
 
 struct CreateNewMessageView: View {
   @Environment(\.presentationMode) var presentationMode
@@ -24,13 +24,16 @@ struct CreateNewMessageView: View {
             didSelectNewUser(user)
           } label: {
             HStack(spacing: 16) {
-              WebImage(url: URL(string: user.profileImageUrl))
+              KFImage(URL(string: user.profileImageUrl))
                 .resizable()
+                .setProcessor(ResizingImageProcessor(referenceSize: CGSize(width: 50 * UIScreen.main.scale, height: 50 * UIScreen.main.scale), mode: .aspectFit))
+                .loadImmediately()
                 .scaledToFill()
                 .frame(width: 50, height: 50)
                 .clipped()
                 .cornerRadius(50)
                 .overlay(RoundedRectangle(cornerRadius: 50).stroke(Color(.label), lineWidth: 1))
+                .shadow(radius: 5)
              
               Text(user.email)
                 .font(.system(size: 16, weight: .bold))

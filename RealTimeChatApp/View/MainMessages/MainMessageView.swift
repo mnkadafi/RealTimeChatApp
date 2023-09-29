@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SDWebImageSwiftUI
+import Kingfisher
 
 struct MainMessageView: View {
   @ObservedObject private var authViewModel = AuthViewModel()
@@ -46,8 +46,10 @@ struct MainMessageView: View {
   
   private var customNavBar: some View {
     HStack(spacing: 16) {
-      WebImage(url: URL(string: mainMessageViewModel.chatUser?.profileImageUrl ?? ""))
+      KFImage(URL(string: mainMessageViewModel.chatUser?.profileImageUrl ?? ""))
         .resizable()
+        .setProcessor(ResizingImageProcessor(referenceSize: CGSize(width: 50 * UIScreen.main.scale, height: 50 * UIScreen.main.scale), mode: .aspectFit))
+        .loadImmediately()
         .scaledToFill()
         .frame(width: 50, height: 50)
         .clipped()
@@ -113,8 +115,10 @@ struct MainMessageView: View {
             shouldNavigateToLogChatView.toggle()
           } label: {
             HStack(spacing: 16) {
-              WebImage(url: URL(string: recentMessage.profileImageUrl))
+              KFImage(URL(string: recentMessage.profileImageUrl))
                 .resizable()
+                .setProcessor(ResizingImageProcessor(referenceSize: CGSize(width: 64 * UIScreen.main.scale, height: 64 * UIScreen.main.scale), mode: .aspectFit))
+                .loadImmediately()
                 .scaledToFill()
                 .frame(width: 64, height: 64)
                 .clipped()
