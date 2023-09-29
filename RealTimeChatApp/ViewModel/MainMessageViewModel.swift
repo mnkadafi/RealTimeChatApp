@@ -7,27 +7,11 @@
 
 import SwiftUI
 import Firebase
-
-struct RecentMessage: Identifiable {
-  var id: String { documentId }
-  let documentId: String
-  let text, fromId, toId: String
-  let email, profileImageUrl: String
-  let timestamp: Timestamp
-  
-  init(documentId: String, data: [String: Any]) {
-    self.documentId = documentId
-    self.text = data[FirebaseConstants.text] as? String ?? ""
-    self.fromId = data[FirebaseConstants.fromId] as? String ?? ""
-    self.toId = data[FirebaseConstants.toId] as? String ?? ""
-    self.email = data[FirebaseConstants.email] as? String ?? ""
-    self.profileImageUrl = data[FirebaseConstants.profileImageUrl] as? String ?? ""
-    self.timestamp = data[FirebaseConstants.timestamp] as? Timestamp ?? Timestamp(date: Date())
-  }
-}
+import FirebaseFirestoreSwift
 
 class MainMessageViewModel: ObservableObject {
   @Published var chatUser: ChatUser?
+//  @Published var selectedChatUser: ChatUser?
   @Published var recentMessages = [RecentMessage]()
   @Published var errorMessage: String = ""
   
@@ -36,7 +20,7 @@ class MainMessageViewModel: ObservableObject {
     fetchRecentMessages()
   }
   
-  private func fetchRecentMessages() {
+  func fetchRecentMessages() {
     guard let uid = Auth.auth().currentUser?.uid else { return }
     Firestore.firestore()
       .collection("recent_messages")
@@ -52,15 +36,19 @@ class MainMessageViewModel: ObservableObject {
         
         querySnapshot?.documentChanges.forEach({ change in
           let docId = change.document.documentID
-          let data = change.document.data()
           
           if let index = self.recentMessages.firstIndex(where: { rm in
-            return rm.documentId == docId
+            return rm.id == docId
           }) {
             self.recentMessages.remove(at: index)
           }
           
-          self.recentMessages.insert(.init(documentId: docId, data: data), at: 0)
+          do {
+            let rm = try change.document.data(as: RecentMessage.self)
+            self.recentMessages.insert(rm, at: 0)
+          } catch {
+            print(error)
+          }
         })
       }
   }
@@ -77,12 +65,18 @@ class MainMessageViewModel: ObservableObject {
         print("Failed to fetch current user", error)
       }
       
-      guard let data = snapshot?.data() else {
-        self.errorMessage = "No data found."
-        return
+      do {
+        let data = try snapshot?.data(as: ChatUser.self)
+        self.chatUser = data
+      } catch {
+        print(error)
       }
-      
-      self.chatUser = .init(data: data)
     }
+  }
+  
+  func resetData() {
+    self.chatUser = nil
+    self.recentMessages = [RecentMessage]()
+    self.errorMessage = ""
   }
 }

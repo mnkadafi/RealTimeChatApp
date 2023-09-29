@@ -9,11 +9,13 @@ import SwiftUI
 
 struct ChatLogView: View {
   @ObservedObject var chatLogViewModel: ChatLogViewModel
-  let chatUser: ChatUser?
+  @State var value: CGFloat = 0
+  
+  let selectedChatUser: ChatUser?
   let emptyScrollToString = "Empty"
   
   init(chatUser: ChatUser?) {
-    self.chatUser = chatUser
+    self.selectedChatUser = chatUser
     self.chatLogViewModel = .init(chatUser: chatUser)
   }
   
@@ -24,12 +26,28 @@ struct ChatLogView: View {
       VStack(spacing: 0) {
         Spacer()
         chatBottomBar
-          .padding(.bottom, 28)
+          .padding(.bottom, self.value == 0 ? 28 : 0)
           .background(Color.white)
+      }
+      .offset(y: -self.value)
+      .animation(.spring())
+      .onAppear {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notif in
+          let value = notif.userInfo![UIResponder.keyboardFrameBeginUserInfoKey] as! CGRect
+          let height = value.height
+          
+          self.value = height-32
+        }
       }
       .edgesIgnoringSafeArea(.bottom)
     }
-    .navigationTitle(chatUser?.email ?? "")
+    .onAppear {
+      chatLogViewModel.fetchMessages()
+    }
+    .onDisappear {
+      chatLogViewModel.chatMessages = [ChatMessages]()
+    }
+    .navigationTitle(selectedChatUser?.email ?? "")
     .navigationBarTitleDisplayMode(.inline)
   }
   
@@ -55,6 +73,9 @@ struct ChatLogView: View {
       }
     }
     .background(Color(.init(white: 0.95, alpha: 1)))
+    .onTapGesture {
+      self.dismissKeyboard()
+    }
   }
   
   private var chatBottomBar: some View {
@@ -69,9 +90,11 @@ struct ChatLogView: View {
           .autocorrectionDisabled(true)
           .opacity(chatLogViewModel.chatText.isEmpty ? 0.5 : 1)
       }
+      .background(Color(.init(white: 0.95, alpha: 1)))
       .frame(height: 40)
       
       Button {
+        self.dismissKeyboard()
         chatLogViewModel.handleSend()
       } label: {
         Text("Send")
@@ -84,6 +107,11 @@ struct ChatLogView: View {
     }
     .padding(.horizontal)
     .padding(.vertical, 8)
+  }
+  
+  private func dismissKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    self.value = 0
   }
 }
 

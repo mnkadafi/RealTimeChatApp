@@ -56,6 +56,7 @@ struct LoginView: View {
             TextField("Email", text: $email)
               .keyboardType(.emailAddress)
               .autocapitalization(.none)
+              .autocorrectionDisabled(true)
             
             SecureField("Password", text: $password)
           }

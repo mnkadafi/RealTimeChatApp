@@ -8,21 +8,23 @@
 import Foundation
 import Firebase
 import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 class ChatLogViewModel: ObservableObject {
   @Published var chatText: String = ""
   @Published var errorMessage: String = ""
   @Published var chatMessages = [ChatMessages]()
   @Published var count = 0
-  
-  let chatUser: ChatUser?
+  @Published var chatUser: ChatUser?
+  @Published var currentUser: ChatUser?
   
   init(chatUser: ChatUser?) {
     self.chatUser = chatUser
+    fetchCurrentUser()
     fetchMessages()
   }
   
-  private func fetchMessages() {
+  func fetchMessages() {
     guard let fromId = Auth.auth().currentUser?.uid else { return }
     guard let toId = chatUser?.uid else { return }
     
@@ -39,9 +41,12 @@ class ChatLogViewModel: ObservableObject {
         
         querySnapshot?.documentChanges.forEach({ change in
           if change.type == .added {
-            let docId = change.document.documentID
-            let data = change.document.data()
-            self.chatMessages.append(.init(documentId: docId, data: data))
+            do {
+              let cm = try change.document.data(as: ChatMessages.self)
+              self.chatMessages.append(cm)
+            } catch {
+              print(error, "ERROR")
+            }
           }
         })
         
@@ -95,29 +100,85 @@ class ChatLogViewModel: ObservableObject {
   
   private func persistRecentMessage() {
     guard let chatUser = chatUser else { return }
-    guard let uid = Auth.auth().currentUser?.uid else { return }
+    guard let senderUser = self.currentUser else {
+      return
+    }
     
-    let document = Firestore.firestore()
+    let senderRecentdocument = Firestore.firestore()
       .collection("recent_messages")
-      .document(uid)
+      .document(senderUser.uid)
       .collection("messages")
       .document(chatUser.uid)
     
-    let data = [
+    let senderData = [
       FirebaseConstants.timestamp: Timestamp(),
       FirebaseConstants.text: self.chatText,
-      FirebaseConstants.fromId: uid,
+      FirebaseConstants.fromId: senderUser.uid,
       FirebaseConstants.toId: chatUser.uid,
       FirebaseConstants.profileImageUrl: chatUser.profileImageUrl,
       FirebaseConstants.email: chatUser.email,
     ] as [String: Any]
     
-    document.setData(data) { error in
+    senderRecentdocument.setData(senderData) { error in
       if let error = error {
-        self.errorMessage = "Failed to save recent message into Firestore \(error)"
-        print("Failed to save recent message into Firestore", error)
+        self.errorMessage = "Failed to save to sender recent message \(error)"
+        print("Failed to save to sender recent message", error)
         return
       }
     }
+    
+    let recipientData = [
+      FirebaseConstants.timestamp: Timestamp(),
+      FirebaseConstants.text: self.chatText,
+      FirebaseConstants.fromId: senderUser.uid,
+      FirebaseConstants.toId: chatUser.uid,
+      FirebaseConstants.profileImageUrl: senderUser.profileImageUrl,
+      FirebaseConstants.email: senderUser.email,
+    ] as [String: Any]
+    
+    let recipientRecentdocument = Firestore.firestore()
+      .collection("recent_messages")
+      .document(chatUser.uid)
+      .collection("messages")
+      .document(senderUser.uid)
+    
+    recipientRecentdocument.setData(recipientData) { error in
+      if let error = error {
+        self.errorMessage = "Failed to save to recipient recent message \(error)"
+        print("Failed to save to recipient recent message", error)
+        return
+      }
+    }
+    
+    print("Successfully save recent message")
+  }
+  
+  func fetchCurrentUser() {
+    guard let uid = Auth.auth().currentUser?.uid else {
+      errorMessage = "Couldn't find firebase user id"
+      return
+    }
+    errorMessage = "\(uid)"
+    Firestore.firestore().collection("users").document(uid).getDocument { snapshot, error in
+      if let error = error {
+        self.errorMessage = "Failed to fetch current user \(error)"
+        print("Failed to fetch current user", error)
+      }
+      
+      do {
+        let data = try snapshot?.data(as: ChatUser.self)
+        self.currentUser = data
+      } catch {
+        print(error)
+      }
+    }
+  }
+  
+  func resetData() {
+    self.chatText = ""
+    self.errorMessage = ""
+    self.chatMessages = [ChatMessages]()
+    self.count = 0
+    self.chatUser = nil
   }
 }

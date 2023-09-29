@@ -11,10 +11,11 @@ import SDWebImageSwiftUI
 struct MainMessageView: View {
   @ObservedObject private var authViewModel = AuthViewModel()
   @ObservedObject private var mainMessageViewModel = MainMessageViewModel()
+  
   @State var shouldShowOptions: Bool = false
   @State var shouldShowNewMessagesScreen: Bool = false
   @State var shouldNavigateToLogChatView: Bool = false
-  @State var chatUser: ChatUser?
+  @State var selectedChatUser: ChatUser?
   
   var body: some View {
     NavigationView {
@@ -23,7 +24,15 @@ struct MainMessageView: View {
         messageView
         
         NavigationLink("", isActive: $shouldNavigateToLogChatView) {
-          ChatLogView(chatUser: chatUser)
+          ChatLogView(chatUser: selectedChatUser)
+        }
+      }
+      .onAppear {
+        if(!authViewModel.isUserCurrentlyLogOut && mainMessageViewModel.recentMessages.count == 0) {
+          DispatchQueue.main.async {
+            mainMessageViewModel.fetchRecentMessages()
+          }
+          print("HOREEEEE")
         }
       }
       .overlay(newMessageButton, alignment: .bottom)
@@ -73,6 +82,7 @@ struct MainMessageView: View {
         .destructive(Text("Sign Out"), action: {
           print("handle sign out")
           authViewModel.handleSignOut()
+          mainMessageViewModel.resetData()
         }),
         .cancel()
       ])
@@ -80,7 +90,11 @@ struct MainMessageView: View {
     .fullScreenCover(isPresented: $authViewModel.isUserCurrentlyLogOut) {
       LoginView()
         .onDisappear {
-          mainMessageViewModel.fetchCurrentUser()
+          DispatchQueue.main.async {
+            mainMessageViewModel.fetchCurrentUser()
+            mainMessageViewModel.fetchRecentMessages()
+          }
+          print("HOREEEEE")
         }
       .environmentObject(authViewModel)
     }
@@ -90,8 +104,10 @@ struct MainMessageView: View {
     ScrollView {
       ForEach(mainMessageViewModel.recentMessages) { recentMessage in
         VStack {
-          NavigationLink {
-            Text("DESTINASI")
+          Button {
+            let data = ChatUser(uid: mainMessageViewModel.chatUser?.uid == recentMessage.toId ? recentMessage.fromId : recentMessage.toId, email: recentMessage.email, profileImageUrl: recentMessage.profileImageUrl)
+            self.selectedChatUser = data
+            shouldNavigateToLogChatView.toggle()
           } label: {
             HStack(spacing: 16) {
               WebImage(url: URL(string: recentMessage.profileImageUrl))
@@ -104,22 +120,35 @@ struct MainMessageView: View {
                 .shadow(radius: 5)
               
               VStack(alignment: .leading) {
-                Text(recentMessage.email)
-                  .font(.system(size: 16, weight: .bold))
-                  .foregroundColor(Color(.label))
+                HStack {
+                  Text(recentMessage.email)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Color(.label))
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(1)
+                  
+                  Spacer()
+                  
+                  Text(recentMessage.timestamp.toDateString(withFormat: "HH:mm"))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color(.label))
+                }
                 
-                Text(recentMessage.text)
-                  .font(.system(size: 14))
-                  .foregroundColor(Color(.lightGray))
-                  .multilineTextAlignment(.leading)
-                  .lineLimit(2)
+                HStack {
+                  Text(recentMessage.text)
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(.lightGray))
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                 
+                  Spacer()
+                  
+                  Text("Jam")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color(.label))
+                    .opacity(0)
+                }
               }
-              
-              Spacer()
-              
-              Text("22d")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color(.label))
             }
           }
           
@@ -152,17 +181,42 @@ struct MainMessageView: View {
     .fullScreenCover(isPresented: $shouldShowNewMessagesScreen) {
       CreateNewMessageView(didSelectNewUser: { user in
         self.shouldNavigateToLogChatView.toggle()
-        self.chatUser = user
+        self.selectedChatUser = user
       })
     }
   }
 }
 
-struct MainMessageView_Previews: PreviewProvider {
-  static var previews: some View {
+//struct MainMessageView_Previews: PreviewProvider {
+//  static var previews: some View {
 //    MainMessageView()
-//      .preferredColorScheme(.dark)
-    
-    MainMessageView()
-  }
-}
+//  }
+//}
+
+//public class MainMessageRouter {
+//  @ObservedObject var mainMessageViewModel: MainMessageViewModel
+//
+//  init(_ mainMessageViewModel: MainMessageViewModel) {
+//    self.mainMessageViewModel = mainMessageViewModel
+//  }
+//
+//  func linkBuilder<Content: View>(for recentMessage: RecentMessage, @ViewBuilder content: () -> Content) -> some View {
+//    NavigationLink(
+//      destination: self.makeDetailView(for: recentMessage)) {
+//      content()
+//    }
+//  }
+//
+//  func makeDetailView(for recentMessage: RecentMessage) -> some View {
+//    var selectedUser: ChatUser?
+//
+//    mainMessageViewModel.fetchSelectedUser(selectedRecentMessage: recentMessage) { chatUser in
+//      selectedUser = chatUser
+//      print(chatUser)
+//    }
+//
+//    print(selectedUser, "ASAS")
+//
+//    return ChatLogView(chatUser: selectedUser)
+//  }
+//}
