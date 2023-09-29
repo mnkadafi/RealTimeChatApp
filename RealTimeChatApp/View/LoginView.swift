@@ -19,69 +19,81 @@ struct LoginView: View {
   var body: some View {
     NavigationView {
       ScrollView {
-        VStack(spacing: 16) {
-          Picker(selection: $isLoginMode) {
-            Text("Login")
-              .tag(true)
-            Text("Create Account")
-              .tag(false)
-          } label: {
-            Text("Picker Here")
-          }
-          .pickerStyle(SegmentedPickerStyle())
-          
-          if !isLoginMode {
-            Button {
-              shouldShowImagePicker.toggle()
+        ZStack {
+          VStack(spacing: 16) {
+            Picker(selection: $isLoginMode) {
+              Text("Login")
+                .tag(true)
+              Text("Create Account")
+                .tag(false)
             } label: {
-              VStack {
-                if let image = selectedImage {
-                  Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 128, height: 128)
-                    .cornerRadius(64)
-                } else {
-                  Image(systemName: "person.fill")
-                    .font(.system(size: 64))
-                    .padding()
-                    .foregroundColor(Color(.label))
-                }
-              }
-              .overlay(RoundedRectangle(cornerRadius: 64).stroke(Color.black, lineWidth: 3))
+              Text("Picker Here")
             }
-          }
-          
-          Group {
-            TextField("Email", text: $email)
-              .keyboardType(.emailAddress)
-              .autocapitalization(.none)
-              .autocorrectionDisabled(true)
+            .pickerStyle(SegmentedPickerStyle())
             
-            SecureField("Password", text: $password)
-          }
-          .padding(12)
-          .background(Color.white)
-          
-          Button {
-            handleAction()
-          } label: {
-            HStack {
-              Spacer()
-              Text(isLoginMode ? "Login" : "Create Account")
-                .foregroundColor(Color.white)
-                .padding(.vertical, 12)
-                .font(.system(size: 14, weight: .semibold))
-              Spacer()
+            if !isLoginMode {
+              Button {
+                shouldShowImagePicker.toggle()
+              } label: {
+                VStack {
+                  if let image = selectedImage {
+                    Image(uiImage: image)
+                      .resizable()
+                      .scaledToFill()
+                      .frame(width: 128, height: 128)
+                      .cornerRadius(64)
+                  } else {
+                    Image(systemName: "person.fill")
+                      .font(.system(size: 64))
+                      .padding()
+                      .foregroundColor(Color(.label))
+                  }
+                }
+                .overlay(RoundedRectangle(cornerRadius: 64).stroke(Color.black, lineWidth: 3))
+              }
             }
-            .background(Color.blue)
-            .cornerRadius(6)
+            
+            Group {
+              TextField("Email", text: $email)
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                .autocorrectionDisabled(true)
+              
+              SecureField("Password", text: $password)
+            }
+            .padding(12)
+            .background(Color.white)
+            
+            Button {
+              handleAction()
+            } label: {
+              HStack {
+                Spacer()
+                Text(isLoginMode ? "Login" : "Create Account")
+                  .foregroundColor(Color.white)
+                  .padding(.vertical, 12)
+                  .font(.system(size: 14, weight: .semibold))
+                Spacer()
+              }
+              .background(Color.blue)
+              .cornerRadius(6)
+            }
+            
+            if(!authViewModel.isLoading) {
+              Text(authViewModel.loginStatusMessage)
+                .foregroundColor(.red)
+            }
           }
+          .padding()
           
-          Text(authViewModel.loginStatusMessage)
-            .foregroundColor(.red)
+          if(authViewModel.isLoading) {
+            ZStack {
+              ProgressView("Loading…")
+                .scaleEffect(2)
+                .font(.system(size:8))
+            }
+          }
         }
-        .padding()
       }
       .navigationTitle(isLoginMode ? "Login" : "Create Account")
       .background(Color(.init(white: 0, alpha: 0.05)).ignoresSafeArea())
@@ -101,9 +113,9 @@ struct LoginView: View {
   }
 }
 
-struct LoginView_Previews: PreviewProvider {
-  static var previews: some View {
-    LoginView()
-      .environmentObject(AuthViewModel())
-  }
-}
+//struct LoginView_Previews: PreviewProvider {
+//  static var previews: some View {
+//    LoginView()
+//      .environmentObject(AuthViewModel())
+//  }
+//}

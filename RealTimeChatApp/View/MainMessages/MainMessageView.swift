@@ -21,7 +21,14 @@ struct MainMessageView: View {
     NavigationView {
       VStack {
         customNavBar
-        messageView
+        
+        if(mainMessageViewModel.recentMessages.count == 0) {
+          information
+          
+          Spacer()
+        } else {
+          messageView
+        }
         
         NavigationLink("", isActive: $shouldNavigateToLogChatView) {
           ChatLogView(chatUser: selectedChatUser)
@@ -32,7 +39,6 @@ struct MainMessageView: View {
           DispatchQueue.main.async {
             mainMessageViewModel.fetchRecentMessages()
           }
-          print("HOREEEEE")
         }
       }
       .overlay(newMessageButton, alignment: .bottom)
@@ -74,7 +80,6 @@ struct MainMessageView: View {
           .font(.system(size: 24, weight: .bold))
           .foregroundColor(Color(.label))
       }
-
     }
     .padding()
     .actionSheet(isPresented: $shouldShowOptions) {
@@ -91,10 +96,10 @@ struct MainMessageView: View {
       LoginView()
         .onDisappear {
           DispatchQueue.main.async {
+            authViewModel.loginStatusMessage = ""
             mainMessageViewModel.fetchCurrentUser()
             mainMessageViewModel.fetchRecentMessages()
           }
-          print("HOREEEEE")
         }
       .environmentObject(authViewModel)
     }
@@ -185,13 +190,32 @@ struct MainMessageView: View {
       })
     }
   }
+  
+  private var information: some View {
+    VStack {
+      Spacer()
+      VStack(spacing: 12) {
+        Image(systemName: "info.circle.fill")
+          .font(.system(size: 50))
+          .foregroundColor(Color(.lightGray))
+        
+        Text("Pesan yang anda kirimkan akan tampil di halaman ini")
+          .font(.system(size: 18, weight: .semibold))
+          .foregroundColor(Color(.lightGray))
+          .multilineTextAlignment(.center)
+      }
+      .padding(.horizontal)
+      
+      Spacer()
+    }
+  }
 }
 
-//struct MainMessageView_Previews: PreviewProvider {
-//  static var previews: some View {
-//    MainMessageView()
-//  }
-//}
+struct MainMessageView_Previews: PreviewProvider {
+  static var previews: some View {
+    MainMessageView()
+  }
+}
 
 //public class MainMessageRouter {
 //  @ObservedObject var mainMessageViewModel: MainMessageViewModel
