@@ -35,10 +35,8 @@ struct MainMessageView: View {
         }
       }
       .onAppear {
-        if(!authViewModel.isUserCurrentlyLogOut && mainMessageViewModel.recentMessages.count == 0) {
-          DispatchQueue.main.async {
-            mainMessageViewModel.fetchRecentMessages()
-          }
+        if(!authViewModel.isUserCurrentlyLogOut) {
+          mainMessageViewModel.fetchRecentMessages()
         }
       }
       .overlay(newMessageButton, alignment: .bottom)
@@ -96,9 +94,9 @@ struct MainMessageView: View {
       LoginView()
         .onDisappear {
           DispatchQueue.main.async {
-            authViewModel.loginStatusMessage = ""
-            mainMessageViewModel.fetchCurrentUser()
-            mainMessageViewModel.fetchRecentMessages()
+//            authViewModel.loginStatusMessage = ""
+//            mainMessageViewModel.fetchCurrentUser()
+//            mainMessageViewModel.fetchRecentMessages()
           }
         }
       .environmentObject(authViewModel)

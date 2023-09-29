@@ -41,12 +41,6 @@ struct ChatLogView: View {
       }
       .edgesIgnoringSafeArea(.bottom)
     }
-    .onAppear {
-      chatLogViewModel.fetchMessages()
-    }
-    .onDisappear {
-      chatLogViewModel.chatMessages = [ChatMessages]()
-    }
     .navigationTitle(selectedChatUser?.email ?? "")
     .navigationBarTitleDisplayMode(.inline)
   }
